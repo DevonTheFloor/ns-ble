@@ -5,48 +5,71 @@
         </ActionBar>
 
         <StackLayout class="stac-lay">
-            <Label text="Here all the function for use bluetooth" class="h3"/>
-            <Label :text="bleMessage" />
+            <Label text="Here all the functions for use bluetooth" class="h4" wrap="true"/>
+            <Label :text="debugInfo" />
             <Button text="Click for BLE" @tap="isBleEnable"/>
-            <Button text="Scan Permission" @tap="scanPermission"/>
+            <Button text="Scan Perm" @tap="scanPermission"/>
             <Button text="Turn On" @tap="turnOn"/>
             <Button text="Start Scanning" @tap="startScan"/>
+            <Button text="STOP Scanning" @tap="stopScan"/>
+            <Button text="OLD Scanning" @tap="oldScan"/>
         </StackLayout>
     </Page>
 </template>
 
 <script>
 import { Bluetooth } from '@nativescript-community/ble'
+// var bluetooth =require('nativescript-bluetooth') 
 
   export default {
     data () {
         return {
-            ble: null,
-            bleMessage: null
+            ble: new Bluetooth
         }
     },
     computed: {
-
+        debugInfo(message) {
+            return message
+        }
     },
     mounted() {
     },
     methods: {
+        stopScan() {
+            this.ble.stopScanning().then(function() {
+                message = "Scanning Stopped"
+                console.log("scanning stopped");
+            });
+        },
+        oldScan() {
+            bluetooth.startScanning({
+            serviceUUIDs: [],
+            seconds: 4,
+            onDiscovered: function (peripheral) {
+                console.log("Periperhal found with UUID: " + peripheral.UUID);
+            }
+            }).then(function() {
+            console.log("scanning complete");
+            }, function (err) {
+            console.log("error while scanning: " + err);
+            });
+        },
         /**
          * Testing the bluetooth connection
          */
         isBleEnable() {
-            this.ble = new Bluetooth()
             this.ble.isBluetoothEnabled()
             .then(
                 function(enabled) {
                     console.log("Enabled? " + enabled);
-                    this.bleMessage = `BLE enable: ${enabled}`
-                    return this.bleMessage
+                    this.debugInfo("Coucou en dur")
                 }
             )
         },
+        /**
+         * Don't work
+         */
         scanPermission() {
-            this.ble = new Bluetooth()
             this.ble.hasCoarseLocationPermission()
             .then(function(granted) {
                 // if this is 'false' you probably want to call 'requestLocationPermission' now
@@ -57,7 +80,6 @@ import { Bluetooth } from '@nativescript-community/ble'
          * Turn on and use bluetooth, ask for permission so
          */
         turnOn () {
-            this.ble = new Bluetooth()
             this.ble.enable()
             .then(function(enabled) {
                 // use Bluetooth features if enabled is true
@@ -66,16 +88,16 @@ import { Bluetooth } from '@nativescript-community/ble'
 );
         },
         startScan() {
-            this.ble = new Bluetooth;
+            console.log('Start Scanning...')
             this.ble.startScanning({
-            filters: [{serviceUUID:'180d'}],
-            seconds: 4,
+            filters: [],
+            seconds: 5,
             onDiscovered: function (peripheral) {
-                console.log("Periperhal found with UUID: " + peripheral.UUID);
+                    console.log("Peripheral found with UUID: ", peripheral.UUID);
                 }
             })
             .then(function() {
-                console.log("scanning complete");
+                console.log("scanning completed");
                 }, function (err) {
                     console.log("error while scanning: " + err);
                     });
